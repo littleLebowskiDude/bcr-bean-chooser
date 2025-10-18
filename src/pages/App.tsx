@@ -37,6 +37,41 @@ const TIPS: Record<string, string> = {
 }
 
 const TOTAL_QUESTIONS = 3
+const CAMPAIGN_NAME = 'bean_chooser'
+
+function buildProductUrl(
+  baseUrl: string,
+  position: number,
+  session: string,
+  utmSource?: string,
+  utmMedium?: string
+) {
+  const utmDefaults = {
+    utm_source: utmSource || 'bean_choose',
+    utm_medium: utmMedium || 'quiz',
+    utm_campaign: CAMPAIGN_NAME,
+    utm_content: position === 1 ? 'top_choice' : `alt_${position}`,
+    utm_term: session
+  }
+
+  try {
+    const url = new URL(baseUrl)
+    Object.entries(utmDefaults).forEach(([key, value]) => {
+      if (key === 'utm_source' || key === 'utm_medium') {
+        if (!url.searchParams.has(key)) {
+          url.searchParams.set(key, value)
+        }
+      } else {
+        url.searchParams.set(key, value)
+      }
+    })
+    return url.toString()
+  } catch {
+    const hasQuery = baseUrl.includes('?')
+    const qs = new URLSearchParams(utmDefaults).toString()
+    return `${baseUrl}${hasQuery ? '&' : '?'}${qs}`
+  }
+}
 
 export default function App() {
   const { step, next, back, answers, answer, setProducts, products, results, setResults, reset } = useApp()
@@ -226,7 +261,13 @@ export default function App() {
                     </div>
                   </div>
                   {results[0] ? (
-                    <ResultCard p={results[0]} position={1} sessionIdValue={sessionRef.current} />
+                    <ResultCard
+                      p={results[0]}
+                      position={1}
+                      sessionIdValue={sessionRef.current}
+                      utmSource={utmRef.current.source}
+                      utmMedium={utmRef.current.medium}
+                    />
                   ) : (
                     <p className="text-sm text-brand-600">No perfect match - here are close picks.</p>
                   )}
@@ -243,7 +284,13 @@ export default function App() {
                   key={p.handle}
                 >
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-brand-500">Alternative #{i + 2}</h3>
-                  <ResultCard p={p} position={i + 2} sessionIdValue={sessionRef.current} />
+                  <ResultCard
+                    p={p}
+                    position={i + 2}
+                    sessionIdValue={sessionRef.current}
+                    utmSource={utmRef.current.source}
+                    utmMedium={utmRef.current.medium}
+                  />
                 </div>
               ))}
             </div>
@@ -334,7 +381,20 @@ function Question({
   )
 }
 
-function ResultCard({ p, position, sessionIdValue }: { p: Product; position: number; sessionIdValue: string }) {
+function ResultCard({
+  p,
+  position,
+  sessionIdValue,
+  utmSource,
+  utmMedium
+}: {
+  p: Product
+  position: number
+  sessionIdValue: string
+  utmSource?: string
+  utmMedium?: string
+}) {
+  const productUrl = buildProductUrl(p.shopify_url, position, sessionIdValue, utmSource, utmMedium)
   return (
     <div className="flex items-start gap-4 sm:gap-6">
       {p.image && (
@@ -345,7 +405,7 @@ function ResultCard({ p, position, sessionIdValue }: { p: Product; position: num
       <div className="flex-1 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <a
-            href={p.shopify_url}
+            href={productUrl}
             className="text-lg font-semibold text-brand-800 transition hover:text-brand-600 hover:underline"
             target="_blank"
             rel="noreferrer"
@@ -363,7 +423,7 @@ function ResultCard({ p, position, sessionIdValue }: { p: Product; position: num
         <div className="flex flex-wrap items-center gap-2">
           <a
             className="inline-flex items-center gap-2 rounded-xl bg-brand-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
-            href={p.shopify_url}
+            href={productUrl}
             target="_blank"
             rel="noreferrer"
             onClick={() =>
