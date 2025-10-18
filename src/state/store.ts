@@ -10,7 +10,7 @@ type State = {
 
 type Actions = {
   setProducts: (p: Product[]) => void
-  answer: (key: keyof Answers, value: string) => void
+  answer: (key: keyof Answers, value: string | string[]) => void
   next: () => void
   back: () => void
   setResults: (r: Product[]) => void

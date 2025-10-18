@@ -6,9 +6,12 @@ const weights = {
   caffeine: 0.15
 }
 
-function flavourOverlap(productFlavours: string[], selected?: string) {
+function flavourOverlap(productFlavours: string[], selected?: string | string[]) {
   if (!selected) return 0
-  return productFlavours.includes(selected) ? 1 : 0
+  const selections = Array.isArray(selected) ? selected : [selected]
+  if (!selections.length) return 0
+  const matches = selections.filter(sel => productFlavours.includes(sel))
+  return matches.length / selections.length
 }
 
 export function scoreProducts(products: Product[], answers: Answers): Product[] {

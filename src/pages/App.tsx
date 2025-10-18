@@ -24,7 +24,6 @@ const FLAVOURS: { key: Flavour; label: string }[] = [
 
 const CAFFEINE: { key: Caffeine; label: string }[] = [
   { key: 'regular', label: 'Regular' },
-  { key: 'half', label: 'Half caf' },
   { key: 'decaf', label: 'Decaf' }
 ]
 
@@ -78,7 +77,13 @@ export default function App() {
 
   const canNext = useMemo(() => {
     if (step === 0) return !!answers.brew
-    if (step === 1) return !!answers.flavour
+    if (step === 1) {
+      const flavour = answers.flavour
+      if (Array.isArray(flavour)) {
+        return flavour.length > 0
+      }
+      return !!flavour
+    }
     if (step === 2) return !!answers.caffeine
     return true
   }, [step, answers])
@@ -99,16 +104,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50 via-white to-brand-100 text-brand-800">
       <div className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
-        <header className="py-10 text-center space-y-4">
+        <header className="py-8 text-center space-y-4">
           <img
             src="https://beechworth.coffee/cdn/shop/files/Beechworth_Coffee_Roasters_Logo_Big.png?v=1750331650"
             alt="Beechworth Coffee Roasters"
             className="mx-auto h-16 sm:h-20 drop-shadow-sm"
           />
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-brand-600">Personalised bean match</p>
-            <p className="text-3xl font-semibold sm:text-4xl">Choose Your Beans</p>
-            <p className="text-base opacity-80 sm:text-lg">Answer three questions and we will line up your ideal roasts.</p>
+            <p className="text-base opacity-80 sm:text-lg">Answer three quick questions and we&apos;ll line up the perfect beans.</p>
           </div>
         </header>
 
@@ -135,7 +138,7 @@ export default function App() {
             )}
             {step === 1 && (
               <Question
-                title="Which flavour direction are you into today?"
+                title="Which flavour directions are you into today?"
                 options={FLAVOURS}
                 value={answers.flavour}
                 onChange={(v) => {
@@ -144,10 +147,13 @@ export default function App() {
                     event: 'question_answered',
                     session_id: sessionId(),
                     question_id: 'flavour',
-                    answer: String(v),
+                    answer: Array.isArray(v) ? v.join(',') : String(v),
                     sequence: 2
                   })
                 }}
+                selectionHint="Choose up to three flavours"
+                multi
+                maxSelections={3}
               />
             )}
             {step === 2 && (
@@ -242,30 +248,55 @@ function Question({
   title,
   options,
   value,
-  onChange
+  onChange,
+  selectionHint,
+  multi = false,
+  maxSelections
 }: {
   title: string
   options: { key: string; label: string }[]
-  value?: string
-  onChange: (v: string) => void
+  value?: string | string[]
+  onChange: (v: string | string[]) => void
+  selectionHint?: string
+  multi?: boolean
+  maxSelections?: number
 }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <h2 className="text-2xl font-semibold">{title}</h2>
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-500">Select one option</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-500">{selectionHint || 'Select one option'}</p>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {options.map((opt) => {
-          const isSelected = value === opt.key
+          const selectedValues = Array.isArray(value) ? value : value ? [value] : []
+          const isSelected = selectedValues.includes(opt.key)
+          const atLimit = multi && maxSelections ? selectedValues.length >= maxSelections : false
           return (
             <button
               key={opt.key}
-              onClick={() => onChange(opt.key)}
+              onClick={() => {
+                if (!multi) {
+                  onChange(opt.key)
+                  return
+                }
+
+                if (isSelected) {
+                  onChange(selectedValues.filter((val) => val !== opt.key))
+                  return
+                }
+
+                if (atLimit) {
+                  return
+                }
+
+                onChange([...selectedValues, opt.key])
+              }}
+              disabled={multi && !isSelected && atLimit}
               className={`group rounded-2xl border px-5 py-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 ${
                 isSelected
                   ? 'border-brand-800 bg-brand-800 text-white shadow-lg shadow-brand-800/30'
-                  : 'border-brand-100 bg-white hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-800/10'
+                  : 'border-brand-100 bg-white hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-800/10 disabled:opacity-40 disabled:hover:translate-y-0'
               }`}
             >
               <span className="block text-base font-medium">{opt.label}</span>
@@ -350,4 +381,3 @@ function ProgressIndicator({ step, total, progress }: { step: number; total: num
     </div>
   )
 }
-
