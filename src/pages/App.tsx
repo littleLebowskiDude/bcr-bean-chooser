@@ -29,13 +29,15 @@ const CAFFEINE: { key: Caffeine; label: string }[] = [
 ]
 
 const TIPS: Record<string, string> = {
-  espresso: 'Use a fine grind, 18–20 g, ~30 ml in 25–30 sec.',
-  moka: 'Use fine grind (between filter & espresso), pre-heat water, remove before sputter.',
-  pourover: 'Use medium grind, bloom first, then pour slowly in circles.',
-  frenchpress: 'Use coarse grind, 3–4 min steep, press slowly.',
-  filter: 'Use medium grind and steady flow.',
-  coldbrew: 'Use coarse grind, steep 12–18 hrs, filter well.'
+  espresso: 'Use a fine grind, 18-20 g in the basket, aim for ~30 ml in 25-30 sec.',
+  moka: 'Use a fine (between filter and espresso) grind, pre-heat water, and remove just before it sputters.',
+  pourover: 'Use a medium grind, bloom first, then pour slowly in circles for even extraction.',
+  frenchpress: 'Use a coarse grind, steep 3-4 minutes, and press slowly to reduce sediment.',
+  filter: 'Use a medium grind, paper filter, and a steady pour for consistency.',
+  coldbrew: 'Use a coarse grind, steep for 12-18 hours, then filter before serving.'
 }
+
+const TOTAL_QUESTIONS = 3
 
 export default function App() {
   const { step, next, back, answers, answer, setProducts, products, results, setResults, reset } = useApp()
@@ -45,13 +47,19 @@ export default function App() {
     const params = new URLSearchParams(location.search)
     const utm_source = params.get('utm_source') || undefined
     const utm_medium = params.get('utm_medium') || undefined
-    ;(async () => {
-      const res = await fetch('/data/products.json')
-      const data: Product[] = await res.json()
-      setProducts(data)
-      setLoading(false)
-      track({ event: 'quiz_started', session_id: sessionId(), utm_source, utm_medium })
-    })()
+
+    const load = async () => {
+      try {
+        const res = await fetch('/data/products.json')
+        const data: Product[] = await res.json()
+        setProducts(data)
+      } finally {
+        setLoading(false)
+        track({ event: 'quiz_started', session_id: sessionId(), utm_source, utm_medium })
+      }
+    }
+
+    load()
   }, [setProducts])
 
   useEffect(() => {
@@ -75,93 +83,157 @@ export default function App() {
     return true
   }, [step, answers])
 
+  const progress = Math.min(step, TOTAL_QUESTIONS) / TOTAL_QUESTIONS
+
   if (loading) {
-    return <div className="min-h-screen grid place-items-center text-brand-800">Loading…</div>
+    return (
+      <div className="min-h-screen grid place-items-center bg-gradient-to-b from-brand-50 via-white to-brand-100 text-brand-800">
+        <div className="flex flex-col items-center gap-3">
+          <span className="h-10 w-10 rounded-full border-4 border-brand-100 border-t-brand-800 animate-spin" />
+          <p className="text-xs uppercase tracking-[0.3em] text-brand-600">Preparing your beans...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 max-w-xl mx-auto text-brand-800">
-      <header className="py-6">
-        <h1 className="text-3xl font-semibold">Bean Choose</h1>
-        <p className="text-sm opacity-80">Find your perfect brew in under 30 seconds.</p>
-      </header>
-
-      {step <= 2 && (
-        <div className="bg-white shadow-md rounded-2xl p-4 sm:p-6 space-y-6">
-          {step === 0 && (
-            <Question
-              title="How do you brew at home or work?"
-              options={BREW_OPTIONS}
-              value={answers.brew}
-              onChange={(v) => {
-                answer('brew', v)
-                track({ event: 'question_answered', session_id: sessionId(), question_id: 'brew_method', answer: String(v), sequence: 1 })
-              }}
-            />
-          )}
-          {step === 1 && (
-            <Question
-              title="Which flavour direction are you into today?"
-              options={FLAVOURS}
-              value={answers.flavour}
-              onChange={(v) => {
-                answer('flavour', v)
-                track({ event: 'question_answered', session_id: sessionId(), question_id: 'flavour', answer: String(v), sequence: 2 })
-              }}
-            />
-          )}
-          {step === 2 && (
-            <Question
-              title="Caffeine preference?"
-              options={CAFFEINE}
-              value={answers.caffeine}
-              onChange={(v) => {
-                answer('caffeine', v)
-                track({ event: 'question_answered', session_id: sessionId(), question_id: 'caffeine', answer: String(v), sequence: 3 })
-              }}
-            />
-          )}
-
-          <div className="flex items-center justify-between">
-            <button className="px-4 py-2 rounded-xl bg-white border" onClick={back} disabled={step === 0}>
-              Back
-            </button>
-            <button
-              className="px-4 py-2 rounded-xl bg-brand-800 text-white disabled:opacity-50"
-              onClick={next}
-              disabled={!canNext}
-            >
-              {step < 2 ? 'Next' : 'Show my beans'}
-            </button>
+    <div className="min-h-screen bg-gradient-to-b from-brand-50 via-white to-brand-100 text-brand-800">
+      <div className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
+        <header className="py-10 text-center space-y-4">
+          <img
+            src="https://beechworth.coffee/cdn/shop/files/Beechworth_Coffee_Roasters_Logo_Big.png?v=1750331650"
+            alt="Beechworth Coffee Roasters"
+            className="mx-auto h-16 sm:h-20 drop-shadow-sm"
+          />
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.3em] text-brand-600">Personalised bean match</p>
+            <p className="text-3xl font-semibold sm:text-4xl">Choose Your Beans</p>
+            <p className="text-base opacity-80 sm:text-lg">Answer three questions and we will line up your ideal roasts.</p>
           </div>
-        </div>
-      )}
+        </header>
 
-      {step >= 3 && (
-        <div className="space-y-4">
-          <div className="bg-white shadow-md rounded-2xl p-4 sm:p-6">
-            <h2 className="text-xl font-semibold mb-1">Top Choice</h2>
-            {results[0] ? <ResultCard p={results[0]} position={1} /> : <p>No perfect match - here are close picks.</p>}
-            <p className="mt-3 text-sm opacity-80">Tip for {answers.brew}: {TIPS[answers.brew || 'espresso']}</p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {results.slice(1).map((p, i) => (
-              <div className="bg-white shadow-md rounded-2xl p-4 sm:p-6" key={p.handle}>
-                <h3 className="text-base font-semibold mb-2">Alternative</h3>
-                <ResultCard p={p} position={i + 2} />
+        {step <= 2 && (
+          <section className="rounded-3xl border border-brand-100/60 bg-white/90 p-6 shadow-xl shadow-brand-800/10 backdrop-blur sm:p-8 space-y-6">
+            <ProgressIndicator step={step} total={TOTAL_QUESTIONS} progress={progress} />
+
+            {step === 0 && (
+              <Question
+                title="How do you brew at home or work?"
+                options={BREW_OPTIONS}
+                value={answers.brew}
+                onChange={(v) => {
+                  answer('brew', v)
+                  track({
+                    event: 'question_answered',
+                    session_id: sessionId(),
+                    question_id: 'brew_method',
+                    answer: String(v),
+                    sequence: 1
+                  })
+                }}
+              />
+            )}
+            {step === 1 && (
+              <Question
+                title="Which flavour direction are you into today?"
+                options={FLAVOURS}
+                value={answers.flavour}
+                onChange={(v) => {
+                  answer('flavour', v)
+                  track({
+                    event: 'question_answered',
+                    session_id: sessionId(),
+                    question_id: 'flavour',
+                    answer: String(v),
+                    sequence: 2
+                  })
+                }}
+              />
+            )}
+            {step === 2 && (
+              <Question
+                title="Caffeine preference?"
+                options={CAFFEINE}
+                value={answers.caffeine}
+                onChange={(v) => {
+                  answer('caffeine', v)
+                  track({
+                    event: 'question_answered',
+                    session_id: sessionId(),
+                    question_id: 'caffeine',
+                    answer: String(v),
+                    sequence: 3
+                  })
+                }}
+              />
+            )}
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                className="rounded-xl border border-brand-100 px-4 py-2 text-sm font-medium text-brand-600 transition hover:border-brand-300 hover:text-brand-800 disabled:opacity-40 disabled:hover:border-brand-100"
+                onClick={back}
+                disabled={step === 0}
+              >
+                Back
+              </button>
+              <button
+                className="rounded-xl bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-800/20 transition hover:bg-brand-600 disabled:opacity-40 disabled:shadow-none"
+                onClick={next}
+                disabled={!canNext}
+              >
+                {step < 2 ? 'Next' : 'Show my beans'}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {step >= 3 && (
+          <section className="space-y-6">
+            <div className="rounded-3xl border border-brand-100/70 bg-white/95 p-6 shadow-xl shadow-brand-800/10 backdrop-blur sm:p-8 space-y-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-brand-600">Your curated pick</p>
+                  <h2 className="text-2xl font-semibold">Top Choice</h2>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
+                  Brew tip
+                </span>
               </div>
-            ))}
-          </div>
+              {results[0] ? (
+                <ResultCard p={results[0]} position={1} />
+              ) : (
+                <p className="text-sm text-brand-600">No perfect match - here are close picks.</p>
+              )}
+              <p className="rounded-2xl bg-brand-50 px-4 py-3 text-sm text-brand-700">
+                {TIPS[answers.brew || 'espresso']}
+              </p>
+            </div>
 
-          <div className="pt-4">
-            <button className="px-4 py-2 rounded-xl bg-white border" onClick={reset}>Start again</button>
-          </div>
-        </div>
-      )}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {results.slice(1).map((p, i) => (
+                <div
+                  className="rounded-3xl border border-brand-100/60 bg-white/95 p-5 shadow-lg shadow-brand-800/10 backdrop-blur"
+                  key={p.handle}
+                >
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-brand-500">Alternative #{i + 2}</h3>
+                  <ResultCard p={p} position={i + 2} />
+                </div>
+              ))}
+            </div>
 
-      <footer className="py-10 text-xs opacity-70 text-center">
-        © Beechworth Coffee Roasters
-      </footer>
+            <div className="pt-4">
+              <button
+                className="rounded-xl border border-brand-200 bg-white px-5 py-2.5 text-sm font-medium text-brand-700 transition hover:bg-brand-50"
+                onClick={reset}
+              >
+                Start again
+              </button>
+            </div>
+          </section>
+        )}
+
+        <footer className="pt-12 pb-6 text-center text-xs text-brand-600">(c) Beechworth Coffee Roasters</footer>
+      </div>
     </div>
   )
 }
@@ -178,20 +250,33 @@ function Question({
   onChange: (v: string) => void
 }) {
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-3">{title}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {options.map((opt) => (
-          <button
-            key={opt.key}
-            onClick={() => onChange(opt.key)}
-            className={`rounded-2xl border p-3 text-left hover:shadow ${
-              value === opt.key ? 'border-brand-800 ring-2 ring-brand-800' : 'border-gray-300'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <h2 className="text-2xl font-semibold">{title}</h2>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-500">Select one option</p>
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {options.map((opt) => {
+          const isSelected = value === opt.key
+          return (
+            <button
+              key={opt.key}
+              onClick={() => onChange(opt.key)}
+              className={`group rounded-2xl border px-5 py-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 ${
+                isSelected
+                  ? 'border-brand-800 bg-brand-800 text-white shadow-lg shadow-brand-800/30'
+                  : 'border-brand-100 bg-white hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-800/10'
+              }`}
+            >
+              <span className="block text-base font-medium">{opt.label}</span>
+              {isSelected && (
+                <span className="mt-3 inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                  Selected
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
@@ -199,30 +284,70 @@ function Question({
 
 function ResultCard({ p, position }: { p: Product; position: number }) {
   return (
-    <div className="flex items-start gap-4">
-      {p.image && <img src={p.image} alt={p.title} className="w-20 h-20 object-cover rounded-xl" />}
-      <div className="flex-1">
-        <div className="flex items-center justify-between">
-          <a href={p.shopify_url} className="text-lg font-medium hover:underline" target="_blank" rel="noreferrer"
-            onClick={() => track({ event: 'click_product', session_id: sessionId(), product_handle: p.handle, position })}>
+    <div className="flex flex-col gap-4 sm:flex-row">
+      {p.image && (
+        <div className="shrink-0 overflow-hidden rounded-2xl border border-brand-100/60 bg-brand-50">
+          <img src={p.image} alt={p.title} className="h-24 w-24 object-cover" />
+        </div>
+      )}
+      <div className="flex-1 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <a
+            href={p.shopify_url}
+            className="text-lg font-semibold text-brand-800 transition hover:text-brand-600 hover:underline"
+            target="_blank"
+            rel="noreferrer"
+            onClick={() =>
+              track({ event: 'click_product', session_id: sessionId(), product_handle: p.handle, position })
+            }
+          >
             {p.title}
           </a>
-          <span className="text-sm">${(p.priceCents / 100).toFixed(2)}</span>
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-600">
+            ${(p.priceCents / 100).toFixed(2)}
+          </span>
         </div>
-        <p className="text-sm opacity-80">{p.tasting_notes}</p>
-        {p.origin && <p className="text-xs opacity-60 mt-1">{p.origin}</p>}
-        <div className="mt-3">
+        <p className="text-sm leading-relaxed text-brand-700">{p.tasting_notes}</p>
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-brand-500">
+          {p.origin && <span>{p.origin}</span>}
+          {!!p.caffeine?.length && <span>{p.caffeine.join(', ')}</span>}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <a
-            className="inline-block px-3 py-2 rounded-xl bg-brand-800 text-white"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
             href={p.shopify_url}
             target="_blank"
             rel="noreferrer"
-            onClick={() => track({ event: 'click_product', session_id: sessionId(), product_handle: p.handle, position })}
+            onClick={() =>
+              track({ event: 'click_product', session_id: sessionId(), product_handle: p.handle, position })
+            }
           >
-            View on Shopify
+            View on Shopify <span aria-hidden="true">↗</span>
           </a>
+          <span className="text-xs font-medium uppercase tracking-[0.3em] text-brand-400">#{position}</span>
         </div>
       </div>
     </div>
   )
 }
+
+function ProgressIndicator({ step, total, progress }: { step: number; total: number; progress: number }) {
+  const displayStep = Math.min(step, total - 1) + 1
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.3em] text-brand-500">
+        <span>
+          Step {displayStep} of {total}
+        </span>
+        <span>{Math.round(progress * 100)}% complete</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-brand-100">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-800 transition-all duration-500"
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
