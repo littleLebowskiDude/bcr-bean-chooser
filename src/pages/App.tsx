@@ -194,26 +194,26 @@ export default function App() {
         )}
 
         {step >= 3 && (
-          <section className="space-y-6">
-            <div className="rounded-3xl border border-brand-100/70 bg-white/95 p-6 shadow-xl shadow-brand-800/10 backdrop-blur sm:p-8 space-y-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-brand-600">Your curated pick</p>
-                  <h2 className="text-2xl font-semibold">Top Choice</h2>
+            <section className="space-y-6">
+              <div className="rounded-3xl border border-amber-300 bg-white/95 p-0 shadow-xl shadow-amber-500/15 backdrop-blur">
+                <div className="h-2 rounded-t-3xl bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500" />
+                <div className="space-y-4 p-6 sm:p-8">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em] text-brand-600">Your curated pick</p>
+                      <h2 className="text-2xl font-semibold">Top Choice</h2>
+                    </div>
+                  </div>
+                  {results[0] ? (
+                    <ResultCard p={results[0]} position={1} />
+                  ) : (
+                    <p className="text-sm text-brand-600">No perfect match - here are close picks.</p>
+                  )}
+                  <p className="rounded-2xl bg-brand-50 px-4 py-3 text-sm text-brand-700">
+                    {TIPS[answers.brew || 'espresso']}
+                  </p>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
-                  Brew tip
-                </span>
               </div>
-              {results[0] ? (
-                <ResultCard p={results[0]} position={1} />
-              ) : (
-                <p className="text-sm text-brand-600">No perfect match - here are close picks.</p>
-              )}
-              <p className="rounded-2xl bg-brand-50 px-4 py-3 text-sm text-brand-700">
-                {TIPS[answers.brew || 'espresso']}
-              </p>
-            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               {results.slice(1).map((p, i) => (
@@ -315,10 +315,10 @@ function Question({
 
 function ResultCard({ p, position }: { p: Product; position: number }) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row">
+    <div className="flex items-start gap-4 sm:gap-6">
       {p.image && (
-        <div className="shrink-0 overflow-hidden rounded-2xl border border-brand-100/60 bg-brand-50">
-          <img src={p.image} alt={p.title} className="h-24 w-24 object-cover" />
+        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-3xl border border-brand-100/60 bg-brand-50 sm:h-28 sm:w-28">
+          <img src={p.image} alt={p.title} className="h-full w-full object-cover" />
         </div>
       )}
       <div className="flex-1 space-y-3">
@@ -335,14 +335,10 @@ function ResultCard({ p, position }: { p: Product; position: number }) {
             {p.title}
           </a>
           <span className="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-600">
-            ${(p.priceCents / 100).toFixed(2)}
+            from ${(p.priceCents / 100).toFixed(2)}
           </span>
         </div>
         <p className="text-sm leading-relaxed text-brand-700">{p.tasting_notes}</p>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-brand-500">
-          {p.origin && <span>{p.origin}</span>}
-          {!!p.caffeine?.length && <span>{p.caffeine.join(', ')}</span>}
-        </div>
         <div className="flex flex-wrap items-center gap-2">
           <a
             className="inline-flex items-center gap-2 rounded-xl bg-brand-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
@@ -353,9 +349,8 @@ function ResultCard({ p, position }: { p: Product; position: number }) {
               track({ event: 'click_product', session_id: sessionId(), product_handle: p.handle, position })
             }
           >
-            View on Shopify <span aria-hidden="true">↗</span>
+            Buy {p.title} now
           </a>
-          <span className="text-xs font-medium uppercase tracking-[0.3em] text-brand-400">#{position}</span>
         </div>
       </div>
     </div>
@@ -381,3 +376,9 @@ function ProgressIndicator({ step, total, progress }: { step: number; total: num
     </div>
   )
 }
+
+
+
+
+
+
