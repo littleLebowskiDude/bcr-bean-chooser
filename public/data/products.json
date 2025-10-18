@@ -1,90 +1,184 @@
 [
-  {
-    "handle": "beechtown-house-espresso",
-    "title": "Beechtown House Espresso",
-    "priceCents": 1895,
-    "flavour_profile": [
-      "chocolatey",
-      "caramel",
-      "balanced"
-    ],
-    "brew_compatibility": {
-      "espresso": 1.0,
-      "moka": 0.9,
-      "pourover": 0.6,
-      "frenchpress": 0.6
+    {
+        "handle":  "smooth-criminal",
+        "title":  "Smooth Criminal",
+        "priceCents":  2000,
+        "image":  "https://cdn.shopify.com/s/files/1/0947/4660/7689/files/Product_Shots_-_Smooth_-_250_g.png?v=1757211615",
+        "flavour_profile":  [
+                                "chocolatey",
+                                "caramel",
+                                "balanced",
+                                "dark"
+                            ],
+        "brew_compatibility":  {
+                                   "pourover":  1,
+                                   "espresso":  1,
+                                   "filter":  0.8,
+                                   "moka":  1,
+                                   "frenchpress":  1
+                               },
+        "caffeine":  [
+                         "regular"
+                     ],
+        "tasting_notes":  "Rich chocolate, warm malt, and sweet caramel – a smooth and indulgent cup that’s perfectly balanced",
+        "origin":  "House blend",
+        "shopify_url":  "https://beechworth.coffee/products/smooth-criminal",
+        "available":  true
     },
-    "caffeine": [
-      "regular"
-    ],
-    "tasting_notes": "Milk chocolate, hazelnut, caramel",
-    "origin": "Brazil \u2022 Colombia",
-    "shopify_url": "https://beechworth.coffee/products/beechtown-house-espresso",
-    "available": true
-  },
-  {
-    "handle": "colombia-decaf-single-origin",
-    "title": "Colombia Decaf - Single Origin",
-    "priceCents": 1995,
-    "flavour_profile": [
-      "chocolatey",
-      "balanced"
-    ],
-    "brew_compatibility": {
-      "espresso": 0.9,
-      "moka": 0.9,
-      "pourover": 0.7,
-      "frenchpress": 0.7,
-      "filter": 0.7
+    {
+        "handle":  "seasonal-blend",
+        "title":  "Seasonal Blend",
+        "priceCents":  2000,
+        "image":  "https://cdn.shopify.com/s/files/1/0947/4660/7689/files/Product_Shots_-_Bold-_-_250_g_2.png?v=1757211615",
+        "flavour_profile":  [
+                                "chocolatey",
+                                "caramel",
+                                "balanced",
+                                "dark"
+                            ],
+        "brew_compatibility":  {
+                                   "pourover":  1,
+                                   "espresso":  1,
+                                   "filter":  0.8,
+                                   "moka":  1,
+                                   "frenchpress":  1
+                               },
+        "caffeine":  [
+                         "regular"
+                     ],
+        "tasting_notes":  "Smooth milk chocolate, crunchy roasted nuts, and luscious caramel for a rich, indulgent cup.",
+        "origin":  "Seasonal origins",
+        "shopify_url":  "https://beechworth.coffee/products/seasonal-blend",
+        "available":  true
     },
-    "caffeine": [
-      "decaf"
-    ],
-    "tasting_notes": "Rich cocoa powder, baked almond, citrus zest",
-    "origin": "Colombia",
-    "shopify_url": "https://beechworth.coffee/products/colombia-decaf-single-origin",
-    "available": true
-  },
-  {
-    "handle": "seasonal-filter",
-    "title": "Seasonal Filter",
-    "priceCents": 1795,
-    "flavour_profile": [
-      "fruity",
-      "floral"
-    ],
-    "brew_compatibility": {
-      "pourover": 1.0,
-      "filter": 1.0,
-      "frenchpress": 0.6
+    {
+        "handle":  "beechworth-bold",
+        "title":  "Beechworth Bold",
+        "priceCents":  2000,
+        "image":  "https://cdn.shopify.com/s/files/1/0947/4660/7689/files/Product_Shots_-_Bold-_-_250_g.png?v=1757211615",
+        "flavour_profile":  [
+                                "chocolatey",
+                                "caramel",
+                                "balanced",
+                                "dark"
+                            ],
+        "brew_compatibility":  {
+                                   "pourover":  1,
+                                   "espresso":  1,
+                                   "filter":  0.8,
+                                   "moka":  1,
+                                   "frenchpress":  1
+                               },
+        "caffeine":  [
+                         "regular"
+                     ],
+        "tasting_notes":  "Deep dark toffee, smooth caramel, and luxurious chocolate. A robust yet velvety flavour profile.",
+        "origin":  "House blend",
+        "shopify_url":  "https://beechworth.coffee/products/beechworth-bold",
+        "available":  true
     },
-    "caffeine": [
-      "regular"
-    ],
-    "tasting_notes": "Stonefruit sweetness with jasmine aroma",
-    "origin": "Ethiopia \u2022 Kenya",
-    "shopify_url": "https://beechworth.coffee/products/seasonal-filter",
-    "available": true
-  },
-  {
-    "handle": "bold-dark-blend",
-    "title": "Bold Dark Blend",
-    "priceCents": 1795,
-    "flavour_profile": [
-      "dark",
-      "caramel"
-    ],
-    "brew_compatibility": {
-      "espresso": 0.9,
-      "moka": 0.9,
-      "frenchpress": 0.8
+    {
+        "handle":  "colombia-single-origin",
+        "title":  "Colombia (Single Origin)",
+        "priceCents":  2000,
+        "image":  "https://cdn.shopify.com/s/files/1/0947/4660/7689/files/Product_Shots_-_Bold-_-_250_g_3.png?v=1757211615",
+        "flavour_profile":  [
+                                "chocolatey",
+                                "balanced",
+                                "fruity",
+                                "floral"
+                            ],
+        "brew_compatibility":  {
+                                   "pourover":  1,
+                                   "espresso":  1,
+                                   "filter":  0.8,
+                                   "moka":  1,
+                                   "frenchpress":  1
+                               },
+        "caffeine":  [
+                         "regular"
+                     ],
+        "tasting_notes":  "Bright lemon and berry acidity, rich coating body, and a smooth chocolate finish. Complex layers of floral, fruity, nutty, and sweet sugar tones.",
+        "origin":  "Colombia",
+        "shopify_url":  "https://beechworth.coffee/products/colombia-single-origin",
+        "available":  true
     },
-    "caffeine": [
-      "regular"
-    ],
-    "tasting_notes": "Dark chocolate, molasses, low acidity",
-    "origin": "Sumatra \u2022 Brazil",
-    "shopify_url": "https://beechworth.coffee/products/bold-dark-blend",
-    "available": true
-  }
+    {
+        "handle":  "colombia-decaf-single-origin",
+        "title":  "Colombia Decaf (Single Origin)",
+        "priceCents":  2100,
+        "image":  "https://cdn.shopify.com/s/files/1/0947/4660/7689/files/Product_Shots_-_Bold-_-_250_g_5.png?v=1757211615",
+        "flavour_profile":  [
+                                "chocolatey",
+                                "balanced",
+                                "fruity",
+                                "dark"
+                            ],
+        "brew_compatibility":  {
+                                   "pourover":  1,
+                                   "espresso":  1,
+                                   "filter":  0.8,
+                                   "moka":  1,
+                                   "frenchpress":  1
+                               },
+        "caffeine":  [
+                         "decaf"
+                     ],
+        "tasting_notes":  "Rich cocoa powder, baked almond, and a touch of citrus zest. Smooth, balanced, and full of character.",
+        "origin":  "Colombia (decaf)",
+        "shopify_url":  "https://beechworth.coffee/products/colombia-decaf-single-origin",
+        "available":  true
+    },
+    {
+        "handle":  "ethiopia-sidamo-single-origin",
+        "title":  "Ethiopia Sidamo (Single Origin)",
+        "priceCents":  2000,
+        "image":  "https://cdn.shopify.com/s/files/1/0947/4660/7689/files/Product_Shots_-_Bold-_-_250_g_6.png?v=1757211616",
+        "flavour_profile":  [
+                                "chocolatey",
+                                "balanced",
+                                "fruity",
+                                "floral"
+                            ],
+        "brew_compatibility":  {
+                                   "pourover":  1,
+                                   "espresso":  1,
+                                   "filter":  0.8,
+                                   "moka":  1,
+                                   "frenchpress":  1
+                               },
+        "caffeine":  [
+                         "regular"
+                     ],
+        "tasting_notes":  "Bright lemon and lavender, smooth vanilla sweetness, and juicy apricot. Balanced with refreshing lemon acidity and a finish of grapefruit and hazelnut.",
+        "origin":  "Ethiopia - Sidamo",
+        "shopify_url":  "https://beechworth.coffee/products/ethiopia-sidamo-single-origin",
+        "available":  true
+    },
+    {
+        "handle":  "brazil-single-origin",
+        "title":  "Brazil (Single Origin)",
+        "priceCents":  2000,
+        "image":  "https://cdn.shopify.com/s/files/1/0947/4660/7689/files/Product_Shots_-_Bold-_-_250_g_4.png?v=1757211615",
+        "flavour_profile":  [
+                                "chocolatey",
+                                "caramel",
+                                "balanced",
+                                "fruity"
+                            ],
+        "brew_compatibility":  {
+                                   "pourover":  1,
+                                   "espresso":  1,
+                                   "filter":  0.8,
+                                   "moka":  1,
+                                   "frenchpress":  1
+                               },
+        "caffeine":  [
+                         "regular"
+                     ],
+        "tasting_notes":  "Milk chocolate and toasted hazelnut with crisp green apple highlights. Sweet berry acidity leads to a luscious caramel finish.",
+        "origin":  "Brazil",
+        "shopify_url":  "https://beechworth.coffee/products/brazil-single-origin",
+        "available":  true
+    }
 ]
