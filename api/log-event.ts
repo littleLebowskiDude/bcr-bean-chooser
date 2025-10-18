@@ -4,7 +4,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
-    const event = req.body
+    const raw = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
+    const event = {
+      ...raw,
+      received_at: new Date().toISOString(),
+      ip: req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+    }
+
     // For MVP we just log to Vercel function logs.
     console.log('BeanChooseEvent', event)
 

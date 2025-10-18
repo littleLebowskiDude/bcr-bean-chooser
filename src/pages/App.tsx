@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../state/store'
 import type { BrewMethod, Caffeine, Flavour, Product } from '../types'
 import { scoreProducts } from '../lib/recommend'
@@ -41,11 +41,15 @@ const TOTAL_QUESTIONS = 3
 export default function App() {
   const { step, next, back, answers, answer, setProducts, products, results, setResults, reset } = useApp()
   const [loading, setLoading] = useState(true)
+  const sessionRef = useRef(sessionId())
+  const startedAtRef = useRef<number | null>(null)
+  const utmRef = useRef<{ source?: string; medium?: string }>({})
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const utm_source = params.get('utm_source') || undefined
     const utm_medium = params.get('utm_medium') || undefined
+    utmRef.current = { source: utm_source, medium: utm_medium }
 
     const load = async () => {
       try {
@@ -54,7 +58,8 @@ export default function App() {
         setProducts(data)
       } finally {
         setLoading(false)
-        track({ event: 'quiz_started', session_id: sessionId(), utm_source, utm_medium })
+        startedAtRef.current = Date.now()
+        track({ event: 'quiz_started', session_id: sessionRef.current, utm_source, utm_medium })
       }
     }
 
@@ -67,7 +72,7 @@ export default function App() {
       setResults(top3)
       track({
         event: 'results_viewed',
-        session_id: sessionId(),
+        session_id: sessionRef.current,
         top_choice: top3[0]?.handle,
         alt_1: top3[1]?.handle,
         alt_2: top3[2]?.handle
@@ -89,6 +94,22 @@ export default function App() {
   }, [step, answers])
 
   const progress = Math.min(step, TOTAL_QUESTIONS) / TOTAL_QUESTIONS
+
+  const handleNext = () => {
+    if (step === 2) {
+      const startedAt = startedAtRef.current
+      const duration = typeof startedAt === 'number' ? Math.max(0, Math.round((Date.now() - startedAt) / 1000)) : undefined
+      track({ event: 'quiz_completed', session_id: sessionRef.current, duration })
+    }
+    next()
+  }
+
+  const handleReset = () => {
+    reset()
+    startedAtRef.current = Date.now()
+    const { source, medium } = utmRef.current
+    track({ event: 'quiz_started', session_id: sessionRef.current, utm_source: source, utm_medium: medium })
+  }
 
   if (loading) {
     return (
@@ -128,7 +149,7 @@ export default function App() {
                   answer('brew', v)
                   track({
                     event: 'question_answered',
-                    session_id: sessionId(),
+                    session_id: sessionRef.current,
                     question_id: 'brew_method',
                     answer: String(v),
                     sequence: 1
@@ -145,7 +166,7 @@ export default function App() {
                   answer('flavour', v)
                   track({
                     event: 'question_answered',
-                    session_id: sessionId(),
+                    session_id: sessionRef.current,
                     question_id: 'flavour',
                     answer: Array.isArray(v) ? v.join(',') : String(v),
                     sequence: 2
@@ -165,7 +186,7 @@ export default function App() {
                   answer('caffeine', v)
                   track({
                     event: 'question_answered',
-                    session_id: sessionId(),
+                    session_id: sessionRef.current,
                     question_id: 'caffeine',
                     answer: String(v),
                     sequence: 3
@@ -184,7 +205,7 @@ export default function App() {
               </button>
               <button
                 className="rounded-xl bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-800/20 transition hover:bg-brand-600 disabled:opacity-40 disabled:shadow-none"
-                onClick={next}
+                onClick={handleNext}
                 disabled={!canNext}
               >
                 {step < 2 ? 'Next' : 'Show my beans'}
@@ -205,7 +226,7 @@ export default function App() {
                     </div>
                   </div>
                   {results[0] ? (
-                    <ResultCard p={results[0]} position={1} />
+                    <ResultCard p={results[0]} position={1} sessionIdValue={sessionRef.current} />
                   ) : (
                     <p className="text-sm text-brand-600">No perfect match - here are close picks.</p>
                   )}
@@ -222,7 +243,7 @@ export default function App() {
                   key={p.handle}
                 >
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-brand-500">Alternative #{i + 2}</h3>
-                  <ResultCard p={p} position={i + 2} />
+                  <ResultCard p={p} position={i + 2} sessionIdValue={sessionRef.current} />
                 </div>
               ))}
             </div>
@@ -230,7 +251,7 @@ export default function App() {
             <div className="pt-4">
               <button
                 className="rounded-xl border border-brand-200 bg-white px-5 py-2.5 text-sm font-medium text-brand-700 transition hover:bg-brand-50"
-                onClick={reset}
+                onClick={handleReset}
               >
                 Start again
               </button>
@@ -313,7 +334,7 @@ function Question({
   )
 }
 
-function ResultCard({ p, position }: { p: Product; position: number }) {
+function ResultCard({ p, position, sessionIdValue }: { p: Product; position: number; sessionIdValue: string }) {
   return (
     <div className="flex items-start gap-4 sm:gap-6">
       {p.image && (
@@ -329,7 +350,7 @@ function ResultCard({ p, position }: { p: Product; position: number }) {
             target="_blank"
             rel="noreferrer"
             onClick={() =>
-              track({ event: 'click_product', session_id: sessionId(), product_handle: p.handle, position })
+              track({ event: 'click_product', session_id: sessionIdValue, product_handle: p.handle, position })
             }
           >
             {p.title}
@@ -346,7 +367,7 @@ function ResultCard({ p, position }: { p: Product; position: number }) {
             target="_blank"
             rel="noreferrer"
             onClick={() =>
-              track({ event: 'click_product', session_id: sessionId(), product_handle: p.handle, position })
+              track({ event: 'click_product', session_id: sessionIdValue, product_handle: p.handle, position })
             }
           >
             Buy {p.title} now
