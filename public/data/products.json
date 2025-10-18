@@ -1,0 +1,91 @@
+[
+  {
+    "handle": "beechtown-house-espresso",
+    "title": "Beechtown House Espresso",
+    "priceCents": 1895,
+    "flavour_profile": [
+      "chocolatey",
+      "caramel",
+      "balanced"
+    ],
+    "brew_compatibility": {
+      "espresso": 1.0,
+      "moka": 0.9,
+      "pourover": 0.6,
+      "frenchpress": 0.6
+    },
+    "caffeine": [
+      "regular"
+    ],
+    "tasting_notes": "Milk chocolate, hazelnut, caramel",
+    "origin": "Brazil \u2022 Colombia",
+    "shopify_url": "https://beechworth.coffee/products/beechtown-house-espresso",
+    "available": true
+  },
+  {
+    "handle": "colombia-decaf-single-origin",
+    "title": "Colombia Decaf - Single Origin",
+    "priceCents": 1995,
+    "flavour_profile": [
+      "chocolatey",
+      "balanced"
+    ],
+    "brew_compatibility": {
+      "espresso": 0.9,
+      "moka": 0.9,
+      "pourover": 0.7,
+      "frenchpress": 0.7,
+      "filter": 0.7
+    },
+    "caffeine": [
+      "decaf"
+    ],
+    "tasting_notes": "Rich cocoa powder, baked almond, citrus zest",
+    "origin": "Colombia",
+    "shopify_url": "https://beechworth.coffee/products/colombia-decaf-single-origin",
+    "available": true
+  },
+  {
+    "handle": "seasonal-filter",
+    "title": "Seasonal Filter",
+    "priceCents": 1795,
+    "flavour_profile": [
+      "fruity",
+      "floral"
+    ],
+    "brew_compatibility": {
+      "pourover": 1.0,
+      "filter": 1.0,
+      "frenchpress": 0.6
+    },
+    "caffeine": [
+      "regular",
+      "half"
+    ],
+    "tasting_notes": "Stonefruit sweetness with jasmine aroma",
+    "origin": "Ethiopia \u2022 Kenya",
+    "shopify_url": "https://beechworth.coffee/products/seasonal-filter",
+    "available": true
+  },
+  {
+    "handle": "bold-dark-blend",
+    "title": "Bold Dark Blend",
+    "priceCents": 1795,
+    "flavour_profile": [
+      "dark",
+      "caramel"
+    ],
+    "brew_compatibility": {
+      "espresso": 0.9,
+      "moka": 0.9,
+      "frenchpress": 0.8
+    },
+    "caffeine": [
+      "regular"
+    ],
+    "tasting_notes": "Dark chocolate, molasses, low acidity",
+    "origin": "Sumatra \u2022 Brazil",
+    "shopify_url": "https://beechworth.coffee/products/bold-dark-blend",
+    "available": true
+  }
+]
