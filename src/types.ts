@@ -15,8 +15,11 @@ export interface Product {
   priceCents: number
   image?: string
   flavour_profile: Flavour[]
+  flavour_weights: Partial<Record<Flavour, number>>
   brew_compatibility: Partial<Record<BrewMethod, number>> // 0.0 - 1.0
   caffeine: Caffeine[] // which caffeine options this product suits
+  caffeine_weights: Partial<Record<Caffeine, number>>
+  coffee_style_weights: Partial<Record<CoffeeStyle, number>>
   tasting_notes: string
   origin?: string
   shopify_url: string

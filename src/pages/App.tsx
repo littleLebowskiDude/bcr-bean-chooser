@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../state/store'
 import type { BrewMethod, Caffeine, CoffeeStyle, Flavour, Product } from '../types'
-import { scoreProducts } from '../lib/recommend'
+import { DEFAULT_WEIGHTS, scoreProducts } from '../lib/recommend'
 import { sessionId, track } from '../lib/analytics'
+import { normaliseWeights, parseProductsCsv, parseWeightsCsv } from '../lib/config'
 
 const BREW_OPTIONS: { key: BrewMethod; label: string }[] = [
   { key: 'espresso', label: 'Espresso machine' },
@@ -44,6 +45,8 @@ const TIPS: Record<string, string> = {
 
 const TOTAL_QUESTIONS = 4
 const CAMPAIGN_NAME = 'bean_chooser'
+const WEIGHTS_SOURCE = import.meta.env.VITE_WEIGHTS_CSV_URL || '/data/weights.csv'
+const PRODUCTS_SOURCE = import.meta.env.VITE_PRODUCTS_CSV_URL || '/data/products.csv'
 
 function buildProductUrl(
   baseUrl: string,
@@ -80,7 +83,20 @@ function buildProductUrl(
 }
 
 export default function App() {
-  const { step, next, back, answers, answer, setProducts, products, results, setResults, reset } = useApp()
+  const {
+    step,
+    next,
+    back,
+    answers,
+    answer,
+    setProducts,
+    products,
+    results,
+    setResults,
+    reset,
+    weights,
+    setWeights
+  } = useApp()
   const [loading, setLoading] = useState(true)
   const sessionRef = useRef(sessionId())
   const startedAtRef = useRef<number | null>(null)
@@ -94,9 +110,51 @@ export default function App() {
 
     const load = async () => {
       try {
-        const res = await fetch('/data/products.json')
-        const data: Product[] = await res.json()
-        setProducts(data)
+        const [productRes, weightRes] = await Promise.allSettled([
+          fetch(PRODUCTS_SOURCE, { cache: 'no-store' }),
+          fetch(WEIGHTS_SOURCE, { cache: 'no-store' })
+        ])
+
+        if (productRes.status === 'fulfilled') {
+          if (productRes.value.ok) {
+            const csv = await productRes.value.text()
+            try {
+              const data: Product[] = parseProductsCsv(csv)
+              if (import.meta.env.DEV) {
+                // Helpful when tweaking CSV schemas
+                console.debug('[bean-choose] Loaded products', data.length)
+              }
+              setProducts(data)
+            } catch (error) {
+              console.error('Unable to parse product CSV', error)
+              throw error
+            }
+          } else {
+            throw new Error(`Unable to load products (${productRes.value.status})`)
+          }
+        } else {
+          throw productRes.reason
+        }
+
+        if (weightRes.status === 'fulfilled') {
+          if (weightRes.value.ok) {
+            const csv = await weightRes.value.text()
+            try {
+              const parsed = parseWeightsCsv(csv)
+              const merged = normaliseWeights(parsed)
+              if (import.meta.env.DEV) {
+                console.debug('[bean-choose] Loaded weights', merged)
+              }
+              setWeights(merged)
+            } catch (error) {
+              console.warn('Unable to parse weight CSV - using defaults', error)
+            }
+          } else {
+            console.warn(`Unable to load weight CSV (${weightRes.value.status}) - using defaults`)
+          }
+        } else {
+          console.warn('Unable to load weight CSV - using defaults', weightRes.reason)
+        }
       } finally {
         setLoading(false)
         startedAtRef.current = Date.now()
@@ -105,11 +163,15 @@ export default function App() {
     }
 
     load()
-  }, [setProducts])
+  }, [setProducts, setWeights])
 
   useEffect(() => {
     if (step === TOTAL_QUESTIONS) {
-      const top3 = scoreProducts(products, answers)
+      if (!products.length) return
+      const top3 = scoreProducts(products, answers, weights ?? DEFAULT_WEIGHTS)
+      if (import.meta.env.DEV) {
+        console.debug('[bean-choose] Scored products', top3.map((p) => ({ handle: p.handle, score: (p as any)._score })))
+      }
       setResults(top3)
       track({
         event: 'results_viewed',
@@ -119,7 +181,7 @@ export default function App() {
         alt_2: top3[2]?.handle
       })
     }
-  }, [step, products, answers, setResults])
+  }, [step, products, answers, weights, setResults])
 
   const canNext = useMemo(() => {
     if (step === 0) return !!answers.brew
