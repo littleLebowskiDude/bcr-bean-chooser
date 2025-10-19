@@ -155,7 +155,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-gradient-to-b from-brand-50 via-white to-brand-100 text-brand-800">
+      <div className="min-h-screen grid place-items-center bg-[#1a1a1a] text-brand-800">
         <div className="flex flex-col items-center gap-3">
           <span className="h-10 w-10 rounded-full border-4 border-brand-100 border-t-brand-800 animate-spin" />
           <p className="text-xs uppercase tracking-[0.3em] text-brand-600">Preparing your beans...</p>
@@ -165,17 +165,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-50 via-white to-brand-100 text-brand-800">
+    <div className="min-h-screen bg-[#1a1a1a] text-brand-800">
       <div className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
-        <header className="py-8 text-center space-y-4">
+        <header className="py-4 text-left">
           <img
-            src="https://beechworth.coffee/cdn/shop/files/Beechworth_Coffee_Roasters_Logo_Big.png?v=1750331650"
+            src="/img/logo_black.png"
             alt="Beechworth Coffee Roasters"
-            className="mx-auto h-16 sm:h-20 drop-shadow-sm"
+            className="h-16 sm:h-20 drop-shadow-sm"
           />
-          <div className="space-y-2">
-            <p className="text-base opacity-80 sm:text-lg">Answer four quick questions and we&apos;ll line up the perfect beans.</p>
-          </div>
         </header>
 
         {step <= TOTAL_QUESTIONS - 1 && (
