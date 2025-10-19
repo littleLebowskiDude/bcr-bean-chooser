@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../state/store'
-import type { BrewMethod, Caffeine, Flavour, Product } from '../types'
+import type { BrewMethod, Caffeine, CoffeeStyle, Flavour, Product } from '../types'
 import { scoreProducts } from '../lib/recommend'
 import { sessionId, track } from '../lib/analytics'
 
@@ -27,6 +27,12 @@ const CAFFEINE: { key: Caffeine; label: string }[] = [
   { key: 'decaf', label: 'Decaf' }
 ]
 
+const COFFEE_STYLE_OPTIONS: { key: CoffeeStyle; label: string }[] = [
+  { key: 'milk', label: 'Dairy milk' },
+  { key: 'alt_milk', label: 'Alt milk (soy, oat, etc.)' },
+  { key: 'black', label: 'Black (no milk)' }
+]
+
 const TIPS: Record<string, string> = {
   espresso: 'Use a fine grind, 18-20 g in the basket, aim for ~30 ml in 25-30 sec.',
   moka: 'Use a fine (between filter and espresso) grind, pre-heat water, and remove just before it sputters.',
@@ -36,7 +42,7 @@ const TIPS: Record<string, string> = {
   coldbrew: 'Use a coarse grind, steep for 12-18 hours, then filter before serving.'
 }
 
-const TOTAL_QUESTIONS = 3
+const TOTAL_QUESTIONS = 4
 const CAMPAIGN_NAME = 'bean_chooser'
 
 function buildProductUrl(
@@ -102,7 +108,7 @@ export default function App() {
   }, [setProducts])
 
   useEffect(() => {
-    if (step === 3) {
+    if (step === TOTAL_QUESTIONS) {
       const top3 = scoreProducts(products, answers)
       setResults(top3)
       track({
@@ -124,14 +130,15 @@ export default function App() {
       }
       return !!flavour
     }
-    if (step === 2) return !!answers.caffeine
+    if (step === 2) return !!answers.coffeeStyle
+    if (step === 3) return !!answers.caffeine
     return true
   }, [step, answers])
 
   const progress = Math.min(step, TOTAL_QUESTIONS) / TOTAL_QUESTIONS
 
   const handleNext = () => {
-    if (step === 2) {
+    if (step === TOTAL_QUESTIONS - 1) {
       const startedAt = startedAtRef.current
       const duration = typeof startedAt === 'number' ? Math.max(0, Math.round((Date.now() - startedAt) / 1000)) : undefined
       track({ event: 'quiz_completed', session_id: sessionRef.current, duration })
@@ -167,11 +174,11 @@ export default function App() {
             className="mx-auto h-16 sm:h-20 drop-shadow-sm"
           />
           <div className="space-y-2">
-            <p className="text-base opacity-80 sm:text-lg">Answer three quick questions and we&apos;ll line up the perfect beans.</p>
+            <p className="text-base opacity-80 sm:text-lg">Answer four quick questions and we&apos;ll line up the perfect beans.</p>
           </div>
         </header>
 
-        {step <= 2 && (
+        {step <= TOTAL_QUESTIONS - 1 && (
           <section className="rounded-3xl border border-brand-100/60 bg-white/90 p-6 shadow-xl shadow-brand-800/10 backdrop-blur sm:p-8 space-y-6">
             <ProgressIndicator step={step} total={TOTAL_QUESTIONS} progress={progress} />
 
@@ -214,6 +221,23 @@ export default function App() {
             )}
             {step === 2 && (
               <Question
+                title="How do you take your coffee?"
+                options={COFFEE_STYLE_OPTIONS}
+                value={answers.coffeeStyle}
+                onChange={(v) => {
+                  answer('coffeeStyle', v)
+                  track({
+                    event: 'question_answered',
+                    session_id: sessionRef.current,
+                    question_id: 'coffee_style',
+                    answer: String(v),
+                    sequence: 3
+                  })
+                }}
+              />
+            )}
+            {step === 3 && (
+              <Question
                 title="Caffeine preference?"
                 options={CAFFEINE}
                 value={answers.caffeine}
@@ -224,7 +248,7 @@ export default function App() {
                     session_id: sessionRef.current,
                     question_id: 'caffeine',
                     answer: String(v),
-                    sequence: 3
+                    sequence: 4
                   })
                 }}
               />
@@ -243,16 +267,16 @@ export default function App() {
                 onClick={handleNext}
                 disabled={!canNext}
               >
-                {step < 2 ? 'Next' : 'Show my beans'}
+                {step < TOTAL_QUESTIONS - 1 ? 'Next' : 'Show my beans'}
               </button>
             </div>
           </section>
         )}
 
-        {step >= 3 && (
+        {step >= TOTAL_QUESTIONS && (
             <section className="space-y-6">
-              <div className="rounded-3xl border border-amber-300 bg-white/95 p-0 shadow-xl shadow-amber-500/15 backdrop-blur">
-                <div className="h-2 rounded-t-3xl bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500" />
+              <div className="overflow-hidden rounded-3xl border border-amber-300 bg-white/95 p-0 shadow-xl shadow-amber-500/15 backdrop-blur">
+                <div className="h-2 w-full bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500" />
                 <div className="space-y-4 p-6 sm:p-8">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -363,16 +387,11 @@ function Question({
               disabled={multi && !isSelected && atLimit}
               className={`group rounded-2xl border px-5 py-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 ${
                 isSelected
-                  ? 'border-brand-800 bg-brand-800 text-white shadow-lg shadow-brand-800/30'
+                  ? 'border-black bg-black text-white shadow-lg shadow-black/30'
                   : 'border-brand-100 bg-white hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-800/10 disabled:opacity-40 disabled:hover:translate-y-0'
               }`}
             >
-              <span className="block text-base font-medium">{opt.label}</span>
-              {isSelected && (
-                <span className="mt-3 inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                  Selected
-                </span>
-              )}
+              <span className="block text-base font-medium whitespace-nowrap">{opt.label}</span>
             </button>
           )
         })}
@@ -430,7 +449,7 @@ function ResultCard({
               track({ event: 'click_product', session_id: sessionIdValue, product_handle: p.handle, position })
             }
           >
-            Buy {p.title} now
+            Buy {p.title}
           </a>
         </div>
       </div>

@@ -7,6 +7,7 @@ export type Flavour =
   | 'floral'
   | 'dark'
 export type Caffeine = 'regular' | 'decaf'
+export type CoffeeStyle = 'milk' | 'alt_milk' | 'black'
 
 export interface Product {
   handle: string
@@ -26,4 +27,5 @@ export interface Answers {
   brew?: BrewMethod
   flavour?: Flavour | Flavour[]
   caffeine?: Caffeine
+  coffeeStyle?: CoffeeStyle
 }
