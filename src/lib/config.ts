@@ -39,6 +39,56 @@ const COFFEE_STYLE_COLUMNS: Array<[string, CoffeeStyle]> = [
   ['style_black', 'black']
 ]
 
+const UTF8_DECODER: TextDecoder | undefined =
+  typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : undefined
+
+function decodeLikelyMojibake(value: string): string | undefined {
+  if (!UTF8_DECODER || !value) return undefined
+
+  let needsDecode = false
+  const bytes = new Uint8Array(value.length)
+
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i)
+    if (code > 0xff) {
+      return undefined
+    }
+    if (code >= 0x80) {
+      needsDecode = true
+    }
+    bytes[i] = code
+  }
+
+  if (!needsDecode) return undefined
+
+  try {
+    return UTF8_DECODER.decode(bytes)
+  } catch {
+    return undefined
+  }
+}
+
+function normaliseTextCell(cell?: string): string {
+  if (!cell) return ''
+
+  let value = cell.trim()
+  if (!value) return ''
+
+  const decoded = decodeLikelyMojibake(value)
+  if (decoded !== undefined) {
+    value = decoded.trim()
+  }
+
+  value = value
+    .replace(/\u00a0/g, ' ') // replace NBSP with regular space
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/\u2026/g, '...')
+
+  return value.replace(/\s+/g, ' ')
+}
+
 function clamp01(value: number) {
   if (Number.isNaN(value)) return 0
   if (value < 0) return 0
@@ -67,7 +117,7 @@ function parseCsv(text: string): string[][] {
     currentRow = []
   }
 
-  const content = text.replace(/\r\n/g, '\n')
+  const content = text.replace(/^\ufeff/, '').replace(/\r\n/g, '\n')
 
   for (let i = 0; i < content.length; i += 1) {
     const char = content[i]
@@ -211,7 +261,7 @@ export function parseProductsCsv(csv: string): Product[] {
   const getCell = (row: string[], column: string) => {
     const idx = headerIndex.get(column.toLowerCase())
     if (idx === undefined) return ''
-    return row[idx]?.trim() ?? ''
+    return normaliseTextCell(row[idx])
   }
 
   const products: Product[] = []

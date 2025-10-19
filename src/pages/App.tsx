@@ -354,7 +354,8 @@ export default function App() {
                   ) : (
                     <p className="text-sm text-brand-600">No perfect match - here are close picks.</p>
                   )}
-                  <p className="rounded-2xl bg-brand-50 px-4 py-3 text-sm text-brand-700">
+                  <p className="rounded-2xl bg-brand-50 px-4 py-4 text-sm leading-relaxed text-brand-700">
+                    <span className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600">Brew tip:</span>{' '}
                     {TIPS[answers.brew || 'espresso']}
                   </p>
                 </div>
