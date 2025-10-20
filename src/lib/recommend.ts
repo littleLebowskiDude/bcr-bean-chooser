@@ -39,6 +39,13 @@ export function scoreProducts(
 ): Product[] {
   const scored = products
     .filter((p) => p.available !== false)
+    .filter((p) => {
+      if (answers.caffeine !== 'decaf') return true
+      const caffeineOptions = p.caffeine ?? []
+      const supportsDecaf = caffeineOptions.includes('decaf')
+      const supportsRegular = caffeineOptions.includes('regular')
+      return supportsDecaf && !supportsRegular
+    })
     .map((p) => {
       let score = 0
       if (answers.brew) {
