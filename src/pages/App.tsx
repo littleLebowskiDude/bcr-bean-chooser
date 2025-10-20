@@ -255,6 +255,7 @@ export default function App() {
                     answer: String(v),
                     sequence: 1
                   })
+                  handleNext()
                 }}
               />
             )}
@@ -272,6 +273,9 @@ export default function App() {
                     answer: Array.isArray(v) ? v.join(',') : String(v),
                     sequence: 2
                   })
+                  if (Array.isArray(v) && v.length === 3) {
+                    handleNext()
+                  }
                 }}
                 selectionHint="Choose up to three flavours"
                 multi
@@ -292,6 +296,7 @@ export default function App() {
                     answer: String(v),
                     sequence: 3
                   })
+                  handleNext()
                 }}
               />
             )}
@@ -309,6 +314,7 @@ export default function App() {
                     answer: String(v),
                     sequence: 4
                   })
+                  handleNext()
                 }}
               />
             )}
